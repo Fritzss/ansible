@@ -22,7 +22,7 @@
 
 
 - name: Get default network interface
-  ansible.builtin.command: ip route get 8.8.8.8
+  ansible.builtin.command: ip route get {{ check_default_gw_ip }}
   register: route_info
   changed_when: false
 
@@ -42,10 +42,6 @@
     local_ip: "{{ ip_info.stdout.split()[3].split('/')[0] }}"
     keepalived_priority: "{{ 110 - (ansible_play_hosts.index(inventory_hostname) * 5) }}"
 
-- name: Set router ID from last octet
-  set_fact:
-    local_ip_prefix: "{{ local_ip | regex_replace('\\.\\d+$', '') }}"
-
 
 - name: Generate random auth pass (saved for reuse)
   ansible.builtin.set_fact:
@@ -59,34 +55,23 @@
     keepalived_state: "{{ 'MASTER' if inventory_hostname == (groups[keepalived_group_name] | sort)[0] else 'BACKUP' }}"
 
 
-- name: Scan for free IP in subnet (example using arping)
-  become: true
-  shell: |
-    for i in $(seq 200 254); do
-      IP="{{ local_ip_prefix }}.$i"
-      if ! arping -c 1 -w 1 $IP &>/dev/null; then
-        echo $IP
-        break
-      fi
-    done
-  register: vip_scan
+- name: Get free VIP
+  command: roles/keepalived_source_hashing/files/get_free_vip.py "{{ groups['keepalived_nodes'] | map('extract', hostvars, ['ansible_host']) | join(',') }} {{ start_octet }} {{ end_octet }}"
+  register: free_vip
   changed_when: false
-  run_once: true
-  delegate_to: localhost
+  failed_when: free_vip.stdout == ""
 
 
-- debug:
-    msg: "{{ local_ip_prefix }} {{ vip_scan }}"
-
-
-- name: Set free virtual IP
+- name: Set keepalived_virtual_ip
   set_fact:
-    keepalived_virtual_ip: "{{ vip_scan.stdout }}"
+    keepalived_virtual_ip: "{{ free_vip.stdout.strip() }}"
 
 - name: Set free virtual IP
   set_fact:
      keepalived_router_id: "{{ keepalived_virtual_ip.split('.')[-1] | int }}"
 
+- debug:
+    msg: "router id {{ keepalived_router_id }} VIP {{ keepalived_virtual_ip }}"
 
 - name: Deploy service health check script
   ansible.builtin.template:

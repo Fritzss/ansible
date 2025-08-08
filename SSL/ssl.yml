@@ -1,0 +1,17 @@
+---
+- name: Create self-signed CA
+  gather_facts: false
+  hosts: localhost
+  vars_files:
+    - main.yml
+  roles:
+    - ca_create
+
+- name: Issue certs for all hosts
+  hosts: all
+  gather_facts: false
+  vars_files:
+    - main.yml
+  gather_facts: false
+  roles:
+    - cert_issue
