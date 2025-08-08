@@ -1,0 +1,110 @@
+---
+- name: Create keepalived_script user for health checks
+  ansible.builtin.user:
+    name: keepalived_script
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+
+- name: Set correct permissions for check script
+  ansible.builtin.file:
+    path: /usr/local/bin/check_service.sh
+    owner: keepalived_script
+    group: keepalived_script
+    mode: '0750'
+
+- name: Install arping on Debian/Ubuntu
+  ansible.builtin.apt:
+    name: arping
+    state: present
+    update_cache: yes
+  delegate_to: localhost
+
+
+- name: Get default network interface
+  ansible.builtin.command: ip route get 8.8.8.8
+  register: route_info
+  changed_when: false
+
+
+- name: Extract interface from route
+  set_fact:
+    keepalived_interface: "{{ route_info.stdout.split('dev')[1].split()[0] }}"
+
+
+- name: Get local IP address
+  ansible.builtin.command: ip -4 -o addr show dev {{ keepalived_interface }}
+  register: ip_info
+  changed_when: false
+
+- name: Extract local IP
+  set_fact:
+    local_ip: "{{ ip_info.stdout.split()[3].split('/')[0] }}"
+    keepalived_priority: "{{ 110 - (ansible_play_hosts.index(inventory_hostname) * 5) }}"
+
+- name: Set router ID from last octet
+  set_fact:
+    local_ip_prefix: "{{ local_ip | regex_replace('\\.\\d+$', '') }}"
+
+
+- name: Generate random auth pass (saved for reuse)
+  ansible.builtin.set_fact:
+    keepalived_auth_pass: "{{ lookup('pipe', 'openssl rand -base64 8') | regex_replace('[^a-zA-Z0-9]', '') }}"
+  run_once: true
+  delegate_to: localhost
+
+
+- name: Determine MASTER host
+  set_fact:
+    keepalived_state: "{{ 'MASTER' if inventory_hostname == (groups[keepalived_group_name] | sort)[0] else 'BACKUP' }}"
+
+
+- name: Scan for free IP in subnet (example using arping)
+  become: true
+  shell: |
+    for i in $(seq 200 254); do
+      IP="{{ local_ip_prefix }}.$i"
+      if ! arping -c 1 -w 1 $IP &>/dev/null; then
+        echo $IP
+        break
+      fi
+    done
+  register: vip_scan
+  changed_when: false
+  run_once: true
+  delegate_to: localhost
+
+
+- debug:
+    msg: "{{ local_ip_prefix }} {{ vip_scan }}"
+
+
+- name: Set free virtual IP
+  set_fact:
+    keepalived_virtual_ip: "{{ vip_scan.stdout }}"
+
+- name: Set free virtual IP
+  set_fact:
+     keepalived_router_id: "{{ keepalived_virtual_ip.split('.')[-1] | int }}"
+
+
+- name: Deploy service health check script
+  ansible.builtin.template:
+    src: check_service.sh.j2
+    dest: /usr/local/bin/check_service.sh
+    mode: '0755'
+    owner: root
+    group: root
+
+
+- name: Deploy keepalived config
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  notify: restart keepalived
+
+- name: Ensure keepalived is running
+  ansible.builtin.service:
+    name: keepalived
+    state: started
+    enabled: true

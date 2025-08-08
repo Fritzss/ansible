@@ -1,0 +1,36 @@
+global_defs {
+    script_security
+}
+
+vrrp_script chk_service {
+    script "/usr/local/bin/check_service.sh"
+    interval 2
+    timeout 2
+    fall 2
+    rise 1
+    user keepalived_script
+}
+
+vrrp_instance VI_{{ keepalived_router_id }} {
+    state {{ keepalived_state }}
+    interface {{ keepalived_interface }}
+    virtual_router_id {{ keepalived_router_id }}
+    priority {{ keepalived_priority }}
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ keepalived_auth_pass }}
+    }
+
+    virtual_ipaddress {
+        {{ keepalived_virtual_ip }}
+    }
+
+    track_script {
+        chk_service
+    }
+
+#    notify_master "/usr/local/bin/notify_master.sh"
+#    notify_backup "/usr/local/bin/notify_backup.sh"
+}
