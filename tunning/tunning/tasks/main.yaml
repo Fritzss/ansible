@@ -1,0 +1,138 @@
+---
+- name: tunning
+  notify: reboot_host
+  block:
+  - sysctl:
+      name: vm.swappiness
+      value: 0
+      state: present
+      reload: yes
+
+  - sysctl:
+      name: vm.dirty_ratio
+      value: 80
+      state: present
+      reload: yes
+
+
+  - sysctl:
+      name: vm.dirty_background_ratio
+      value: 5
+      state: present
+      reload: yes
+
+
+  - sysctl:
+      name: vm.max_map_count
+      value: 262144
+      state: present
+      reload: yes
+
+
+  - sysctl:
+      name: net.core.wmem_default
+      value: 1048576
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.core.rmem_default
+      value: 1048576
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.core.wmem_max
+      value: 16777216
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.core.rmem_max
+      value: 16777216
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.ipv4.tcp_wmem
+      value: 4096 1048576 16777216
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.ipv4.tcp_rmem
+      value: 4096 1048576 16777216
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.ipv4.tcp_window_scaling
+      value: 1
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.ipv4.tcp_max_syn_backlog
+      value: 4096
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: net.core.netdev_max_backlog
+      value: 10000
+      sysctl_set: yes
+      reload: yes
+
+
+  - sysctl:
+      name: fs.file-max
+      value: 1048576
+      state: present
+      reload: yes
+
+  - sysctl:
+      name: net.ipv4.tcp_retries2
+      value: 5
+      state: present
+      reload: yes
+
+  - sysctl:
+      name: fs.file  -max
+      state: absent
+      reload: yes
+
+
+  - name: limit
+    copy:
+      src: files/limits.conf
+      dest: /etc/security/limits.conf
+      owner: root
+      group: root
+      mode: "0644"
+      force: true
+
+
+#  - name: limit_clear
+#    lineinfile:
+#      path: /etc/security/limits.conf
+#      regexp: "^{{ item.user }}\\s+{{ item.type }}\\s+{{ item.item }}\\s+"
+#      line: "{{ item.user}} {{ item.type }} {{ item.item }}"
+#      state: absent
+#    loop:
+#        - { user: '*', type: 'soft', item: 'nofile', value: 128000 }
+#        - { user: '*', type: 'hard', item: 'nofile', value: 128000 }
+#        - { user: '*', type: 'soft', item: 'nproc', value: 65536 }
+#        - { user: '*', type: 'hard', item: 'nproc', value: 65536 }
+#        - { user: '*', type: 'soft', item: 'memlock', value: 'unlimited' }
+#        - { user: '*', type: 'hard', item: 'memlock', value: 'unlimited' }
+#        - { user: '*', type: 'soft', item: 'as', value: 'unlimited' }
+#        - { user: '*', type: 'hard', item: 'as', value: 'unlimited' }
+#    ignore_errors: true

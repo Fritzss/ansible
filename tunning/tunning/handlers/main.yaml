@@ -1,0 +1,6 @@
+---
+- name: reboot_host
+  reboot:
+    msg: "reboot"
+    connect_timeout: 10
+    test_command: uptime
