@@ -1,0 +1,36 @@
+packages_keeper:
+  - netcat
+  - clickhouse-keeper
+  - jq
+
+packages_ch:
+  - clickhouse-server
+  - clickhouse-client
+  - clickhouse-common-static
+  - netcat
+  - jq
+
+logs_cluster: 'logs_cluster'
+
+clickhouse-keeper-directory:
+  - "/etc/clickhouse-keeper/config.d"
+  - "/var/log/clickhouse-keeper"
+  - "/var/lib/clickhouse-keeper/coordination/log"
+  - "/var/lib/clickhouse-keeper/coordination/snapshots"
+  - "/var/lib/clickhouse-keeper/cores"
+
+clickhouse_repo: "deb https://packages.clickhouse.com/deb stable main"
+clickhouse_prometheus_port: 9363
+clickhouse_http_port: 8123
+clickhouse_native_port: 9000
+clickhouse_interserver_http_port: 9010
+clickhouse_shards: 1
+clickhouse_replicas: 2
+clickhouse_cluster: cluster
+
+keeper_port: 9181
+
+keeper_operation_timeout_ms: 10000
+keeper_session_timeout_ms: 30000
+keeper_raft_logs_level: trace
+keeper_rotate_log_storage_interval: 10000

@@ -1,0 +1,9 @@
+---
+- name: install
+  ansible.builtin.include_tasks:
+    file: install.yaml
+
+- name: configure
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+

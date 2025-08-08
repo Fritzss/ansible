@@ -1,0 +1,27 @@
+---
+all:
+  vars:
+    clickhouseReplicas: 2
+    clickhouse_distributed_secret: <superpassword>
+  children:
+    clickhouse_servers:
+      hosts:
+        clickhouse1.example.com:
+          ansible_host: 10.0.0.1
+        clickhouse2.example.com:
+          ansible_host: 10.0.0.2
+        clickhouse3.example.com:
+          ansible_host: 10.0.0.3
+        clickhouse4.example.com:
+          ansible_host: 10.0.0.4
+        clickhouse5.example.com:
+          ansible_host: 10.0.0.5
+        clickhouse6.example.com:
+          ansible_host: 10.0.0.6
+    keeper_servers:
+      keeper1.example.com:
+        ansible_host: 10.0.0.7
+      keeper2.example.com:
+        ansible_host: 10.0.0.8
+      keeper3.example.com:
+        ansible_host: 10.0.0.9

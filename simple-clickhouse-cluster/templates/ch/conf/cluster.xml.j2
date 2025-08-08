@@ -1,0 +1,25 @@
+<clickhouse>
+  <remote_servers>
+      <{{ clickhouse_cluster }}>
+{% if clickhouse_distributed_secret is defined %}
+         <secret>{{ clickhouse_distributed_secret }}</secret>
+{% endif %}
+{% for batch in groups[clickhouse_servers] | batch(clickhouse_replicas, fill_with=None) %}
+         <shard_{{ loop.index }}>
+            <weight>{{ clickhouse_replicas }}</weight>
+            <internal_replication>true</internal_replication>
+{% for host in batch %}
+{% if host is not none %}
+               <replica>
+                  <host>{{ host }}</host>
+                  <port>{{ clickhouse_native_port}}</port>
+               </replica>
+{% endif %}
+{% endfor %}
+         </shard_{{ loop.index }}>
+{% endfor %}
+      </{{ clickhouse_cluster }}>
+   </remote_servers>
+</clickhouse>
+
+ <replica>replica_{{ ansible_host | ipaddr('last_octet') }}</replica>

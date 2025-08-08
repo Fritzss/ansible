@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <query_log>
+        <database>system</database>
+        <table>query_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </query_log>
+    <asynchronous_metric_log>
+        <database>system</database>
+        <table>asynchronous_metric_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </asynchronous_metric_log>
+    <part_log>
+        <database>system</database>
+        <table>part_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </part_log>
+    <metric_log>
+        <database>system</database>
+        <table>metric_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </metric_log>
+    <processors_profile_log>
+        <database>system</database>
+        <table>processors_profile_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </processors_profile_log>
+    <trace_log>
+        <database>system</database>
+        <table>trace_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </trace_log>
+    <query_thread_log>
+        <database>system</database>
+        <table>query_thread_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </query_thread_log>
+    <query_views_log>
+        <database>system</database>
+        <table>query_views_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </query_views_log>
+    <session_log>
+        <database>system</database>
+        <table>session_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </session_log>
+    <text_log>
+        <database>system</database>
+        <table>text_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </text_log>
+    <crash_log>
+        <database>system</database>
+        <table>crash_log</table>
+        <ttl>event_date + INTERVAL 1 DAY DELETE</ttl>
+    </crash_log>
+    <backup_log remove="1"/>
+    <error_log remove="1"/>
+    <opentelemetry_span_log remove="1"/>
+    <zookeeper_log remove="1"/>
+</clickhouse>

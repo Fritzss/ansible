@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <logger>
+        <level>information</level>
+        <log>/var/log/clickhouse-keeper/clickhouse-keeper.log</log>
+        <errorlog>/var/log/clickhouse-keeper/clickhouse-keeper.err.log</errorlog>
+        <size>10M</size>
+        <count>10</count>
+    </logger>
+
+    <listen_host>0.0.0.0</listen_host>
+    <interserver_listen_host>0.0.0.0</interserver_listen_host>
+    <path>/var/lib/clickhouse-keeper/</path>
+    <core_path>/var/lib/clickhouse-keeper/cores</core_path>
+    
+    <keeper_server>
+	    <tcp_port>{{ keeper_port }}</tcp_port>
+	    <server_id>{{ inventory_hostname }}</server_id>
+	    <log_storage_path>/var/lib/clickhouse-keeper/coordination/log</log_storage_path>
+	    <snapshot_storage_path>/var/lib/clickhouse-keeper/coordination/snapshots</snapshot_storage_path>
+	    <coordination_settings>
+        	<operation_timeout_ms>10000</operation_timeout_ms>
+            <async_replication>true</async_replication>
+	        <session_timeout_ms>30000</session_timeout_ms>
+	        <raft_logs_level>trace</raft_logs_level>
+	        <rotate_log_storage_interval>10000</rotate_log_storage_interval>
+                <heart_beat_interval_ms>1000</heart_beat_interval_ms>
+                <dead_session_check_period_ms>1000</dead_session_check_period_ms>
+	    </coordination_settings>
+        <raft_configuration>
+{% for host in groups[keeper_hosts] %}
+               <server>
+                  <id>{{ ansible_host | ipaddr('last_octet') }}</id>
+                  <hostname>{{ ansible_host }}</hostname>
+                  <port>{{ clickhouse_native_port }}</port>
+               </server>
+{% endfor %}
+        </raft_configuration>
+    </keeper_server>
+</clickhouse>

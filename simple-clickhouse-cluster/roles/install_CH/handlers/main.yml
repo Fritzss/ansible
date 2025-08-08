@@ -1,0 +1,7 @@
+---
+- name: restart_ch
+  ansible.builtin.systemd:
+    enabled: true
+    state: restarted
+    name: "clickhouse-server.service"
+  ignore_errors: true

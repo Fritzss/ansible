@@ -1,0 +1,51 @@
+---
+- name: "[CH] repository"
+  block:
+    - name: "[CH] Add apt key for repository"
+      copy:
+        src: "{{ clickhouse_repo_key }}"
+        dest: "{{ apt_keyring_clickhouse }}"
+        mode: "0644"
+
+    - name: "[CH] Add repository"
+      ansible.builtin.apt_repository:
+        repo: "{{ clickhouse_repo }}"
+        state: present
+        filename: clickhouse
+
+- name: "[keeper] Install"
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items: '{{ packages_keeper }}'
+
+- name: "[keeper] directory"
+  file:
+    path: "{{ item }}"
+    state: directory
+    group: clickhouse
+    owner: clickhouse
+    mode: "0755"
+    force: True
+  with_items:
+    - "/var/lib/clickhouse-keeper/coordination/log"
+    - "/var/lib/clickhouse-keeper/coordination/snapshots"
+    - "/var/lib/clickhouse-keeper/cores"
+    - "/var/lib/clickhouse-keeper/preprocessed_configs"
+
+- name: "[CH keeper] configure main"
+  template:
+       src: "templates/keeper/config.xml.j2"
+       dest: "/etc/clickhouse-keeper/config.xml"
+       owner: clickhouse
+       group: clickhouse
+       mode: "0400"
+  
+
+- name: Start CH keeper service
+  systemd:
+    daemon_reload: true
+    name: clickhouse-keeper
+    state: started
+    enabled: yes
+  ignore_errors: true

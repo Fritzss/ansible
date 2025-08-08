@@ -1,0 +1,15 @@
+<clickhouse>
+   <macros>
+{% for batch in groups['clickhouse_servers'] | batch(clickhouseReplicas, fill_with=None) %}
+{% set shard_id = loop.index  %}
+{% for host in batch %}
+{% if host == inventory_hostname %}
+{% set short_hostname = inventory_hostname.split('.')[0] %}
+      <shard>shard_{{ shard_id }}</shard>
+      <replica>replica_{{ ansible_host | ipaddr('last_octet') }}</replica>
+      <cluster>{{ logs_cluster }}</cluster>
+{% endif %}
+{% endfor %}
+{% endfor %}
+   </macros>
+</clickhouse>

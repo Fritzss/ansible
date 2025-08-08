@@ -1,0 +1,8 @@
+---
+- name: restart_keeper
+  ansible.builtin.systemd:
+    enabled: true
+    state: restarted
+    name: "clickhouse-keeper.service"
+    daemon_reload: true
+  ignore_errors: true

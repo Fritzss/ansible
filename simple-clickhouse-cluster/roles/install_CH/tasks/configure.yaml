@@ -1,0 +1,42 @@
+---
+- name: "[CH] configure"
+  notify: restart_ch
+  block:
+   - name: copy main conf
+     template:
+       src: '{{ item }}'
+       dest: '/etc/clickhouse-server/{{ item[:-3] | basename }}'
+       owner: clickhouse
+       group: clickhouse
+       mode: 0400
+     with_fileglob:
+       - "templates/ch/*.xml.j2"
+   - name: copy cluster_conf
+     template:
+       src: '{{ item }}'
+       dest: '/etc/clickhouse-server/config.d/{{ item[:-3] | basename }}'
+       owner: clickhouse
+       group: clickhouse
+       mode: '0400'
+     with_fileglob:
+       - "templates/ch/conf/*.xml.j2"
+   - name: "[CH] configure macros"
+     template:
+       src: '{{ item }}'
+       dest: '/etc/clickhouse-server/config.d/{{ item[:-3] | basename }}'
+       owner: clickhouse
+       group: clickhouse
+       mode: '0400'
+     with_fileglob:
+       - "templates/ch/conf/macros/*.xml.j2"
+
+   - name: "[CH] configure client"
+     template:
+       src: '{{ item }}'
+       dest: '/etc/clickhouse-client/{{ item[:-3] | basename }}'
+       owner: root
+       group: root
+       mode: '644'
+     with_fileglob:
+       - "templates/ch/client/*.xml.j2"
+

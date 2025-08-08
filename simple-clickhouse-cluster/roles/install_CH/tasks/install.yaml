@@ -1,0 +1,40 @@
+---
+- name: "[CH] repository"
+  block:
+    - name: "[CH] Add apt key for repository"
+      copy:
+        src: "{{ clickhouse_repo_key }}"
+        dest: "{{ apt_keyring_clickhouse }}"
+        mode: "0644"
+
+    - name: "[CH] Add repository"
+      ansible.builtin.apt_repository:
+        repo: "{{ clickhouse_repo }}"
+        state: present
+        filename: clickhouse
+
+- name: "[Ubuntu] Install"
+  ansible.builtin.apt:
+    name: '{{ item }}'
+    update_cache: yes
+  with_items: '{{ packages_ch }}'
+
+- name: create dir
+  file:
+    dest: /etc/clickhouse-server/{{ item }}
+    state: directory
+    force: true
+    owner: clickhouse
+    group: clickhouse
+    mode: 0500
+  with_items:
+    - "config.d"
+
+- name: chown
+  file:
+    path: /var/lib/clickhouse
+    state: directory
+    force: true
+    owner: clickhouse
+    group: clickhouse
+    recurse: true
