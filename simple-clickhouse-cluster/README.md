@@ -54,7 +54,8 @@ simple-clickhouse-cluster/
 ## Ключевые особенности
 
   1. Автоматическое шардирование и репликация
-  2. Конфиг кластера генерируется динамически на основе инвентаря:
+  2. Количество шардов определяется по формуле clickhouse_servers/clickhouse_replicas=shards
+  3. Конфиг кластера генерируется динамически на основе инвентаря:
 ```jinja
 <remote_servers>
     <{{ clickhouse_cluster }}>
@@ -108,7 +109,7 @@ simple-clickhouse-cluster/
 clickhouse_repo: "deb https://packages.clickhouse.com/deb stable main"
 
 # Параметры кластера
-# Количество шардов колличество шардов определяется по формула ALL NODES/clickhouse_replicas
+# Количество шардов определяется по формуле clickhouse_servers/clickhouse_replicas=shards
 clickhouse_replicas: 2       # Реплик на шард
 clickhouse_cluster: cluster  # Имя кластера
 
