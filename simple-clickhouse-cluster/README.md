@@ -1,3 +1,10 @@
+## подсказка
+
+В производственных средах мы настоятельно рекомендуем запускать ClickHouse Keeper на выделенных узлах. В тестовых средах, если вы решите запускать ClickHouse
+Server и ClickHouse Keeper на одном сервере, то вам не нужно устанавливать ClickHouse Keeper, так как он уже включен в сервер ClickHouse.
+
+https://clickhouse.com/docs/ru/install/debian_ubuntu#install-standalone-clickhouse-keeper
+
 ## ClickHouse Cluster Deployment
 Этот репозиторий автоматизирует развёртывание отказоустойчивого кластера ClickHouse с использованием ClickHouse Keeper для координации. 
 Кластер поддерживает шардирование данных и репликацию.
