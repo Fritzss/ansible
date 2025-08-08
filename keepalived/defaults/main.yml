@@ -1,7 +1,4 @@
 ---
-auth_pass: "secretpass"
-real_servers: []
-
 check_default_gw_ip: 8.8.8.8
 start_octet:
 end_octet:
