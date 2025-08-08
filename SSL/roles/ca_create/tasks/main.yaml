@@ -1,0 +1,26 @@
+---
+- name: Ensure CA directory exists
+  file:
+    path: "{{ ca_dir }}"
+    state: directory
+    mode: '0700'
+
+- name: Generate CA private key
+  command: >
+    openssl genrsa -aes256
+    -passout pass:{{ ca_passphrase }}
+    -out "{{ ca_key_file }}" 4096
+  args:
+    creates: "{{ ca_key_file }}"
+
+- name: Generate self-signed CA certificate
+  command: >
+    openssl req -x509 -new -nodes
+    -key "{{ ca_key_file }}"
+    -sha256 -days {{ ca_validity_period }}
+    -subj "{{ ca_subject }}"
+    -out "{{ ca_cert_file }}"
+    -passin pass:{{ ca_passphrase }}
+  args:
+    creates: "{{ ca_cert_file }}"
+

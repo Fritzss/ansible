@@ -1,0 +1,15 @@
+---
+san_list:
+  - "DNS:{{ inventory_hostname }}"
+  - "DNS:{{ inventory_hostname.split('.')[0] }}"
+  - "IP:{{ ansible_host }}"
+  - "IP:127.0.0.1"
+
+key_length: 2048
+
+ca_validity_period: 3650
+cert_dir: "./pki/issued"
+ca_dir: "./pki/ansible_ca"
+cert_days: 365
+
+ca_passphrase: "MySuperSecretPassphrase"

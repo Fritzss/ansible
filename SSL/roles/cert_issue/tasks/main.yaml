@@ -1,0 +1,63 @@
+---
+- name: Ensure cert directory exists
+  file:
+    path: "{{ cert_dir }}/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+
+- name: Generate private key
+  command: >
+    openssl genrsa -out {{ cert_dir }}/{{ inventory_hostname }}/key.pem {{ key_length }}
+  args:
+    creates: "{{ cert_dir }}/{{ inventory_hostname }}/key.pem"
+  delegate_to: localhost
+
+- name: Generate OpenSSL config with SAN
+  copy:
+    dest: "{{ cert_dir }}/{{ inventory_hostname }}/openssl-san.cnf"
+    content: |
+      [ req ]
+      prompt = no
+      distinguished_name = dn
+      req_extensions = req_ext
+
+      [ dn ]
+      CN = {{ inventory_hostname }}
+
+      [ req_ext ]
+      subjectAltName = {{ san_list | join(', ') }}
+  delegate_to: localhost
+
+- name: Generate CSR with SAN
+  command: >
+    openssl req -new
+    -key {{ cert_dir }}/{{ inventory_hostname }}/key.pem
+    -out {{ cert_dir }}/{{ inventory_hostname }}/request.csr
+    -config {{ cert_dir }}/{{ inventory_hostname }}/openssl-san.cnf
+  args:
+    creates: "{{ cert_dir }}/{{ inventory_hostname }}/request.csr"
+  delegate_to: localhost
+
+- name: Sign CSR with CA including SAN
+  command: >
+    openssl x509 -req
+    -in {{ cert_dir }}/{{ inventory_hostname }}/request.csr
+    -CA {{ ca_dir }}/ca.pem -CAkey {{ ca_dir }}/ca.key
+    -CAcreateserial
+    -out {{ cert_dir }}/{{ inventory_hostname }}/cert.pem
+    -days {{ cert_days }}
+    -passin pass:{{ ca_passphrase }}
+    -sha256
+    -extensions req_ext
+    -extfile {{ cert_dir }}/{{ inventory_hostname }}/openssl-san.cnf
+  args:
+    creates: "{{ cert_dir }}/{{ inventory_hostname }}/cert.pem"
+  delegate_to: localhost
+
+- name: Copy CA cert
+  copy:
+    src: "{{ ca_dir }}/ca.pem"
+    dest: "{{ cert_dir }}/{{ inventory_hostname }}/ca.pem"
+    remote_src: true
+  delegate_to: localhost
