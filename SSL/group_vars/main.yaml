@@ -1,4 +1,7 @@
 ---
+cert_dir: "./pki/issued"
+ca_dir: "./pki/ansible_ca"
+
 ca_key_file: "{{ ca_dir }}/ca.key"
 ca_cert_file: "{{ ca_dir }}/ca.pem"
 ca_subject: "/C=US/ST=Example/L=City/O=ExampleOrg/CN=AnsibleLocalCA"
@@ -6,9 +9,6 @@ ca_validity_period: 3650
 cert_days: 365
 
 key_length: 2048
-
-cert_dir: "./pki/issued"
-ca_dir: "./pki/ansible_ca"
 
 ca_passphrase: "MySuperSecretPassphrase"
 
